@@ -1,16 +1,25 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "BullCowCartridge.h"
 #include "HiddenWordList.h"
+#include "Math/UnrealMathUtility.h"
+
+
+
 
 void UBullCowCartridge::BeginPlay() // When the game starts
 {
     Super::BeginPlay();
-    GetValidWords(WordList);
     SetupGame();
 
-    PrintLine(TEXT("The number of possible words is %i"), WordList.Num());
-    PrintLine(TEXT("The number of valid words is: %i."), GetValidWords(WordList).Num());
-    PrintLine(TEXT("The HiddenWord is: %s."), *HiddenWord);//Debug Line
+    
+    Isograms = GetValidWords(Words);
+    
+
+    // PrintLine(TEXT("The number of possible words is %i"), Words.Num());
+    // PrintLine(TEXT("The number of valid words is: %i."), GetValidWords(Words).Num());
+    // PrintLine(TEXT("ValidWords - 1 is: &i"), GetValidWords(Words).Num() - 1);
+    // PrintLine(TEXT("The HiddenWord is: %s."), *HiddenWord);//Debug Line
+
 
    
   
@@ -32,19 +41,6 @@ void UBullCowCartridge::OnInput(const FString& Input) // When the player hits en
         ProcessGuess(Input);
      
     }
-
-    //Check if Isogram
-    //Prompt to guess again
-    //Check if its the right number of characters
-    //Prompt to guess again
-
-    //Remove Life
-
-    //Check if lives > 0
-    //If Yes GuessAgain
-    //If no show GameOver and HiddenWord
-    //Prompt to play again, Press enter to play again
-    //Playagain or quit
     
 }
 
@@ -53,13 +49,14 @@ void UBullCowCartridge::SetupGame()
 
     PrintLine(TEXT("Welcome to Bull Cows!"));
 
-    HiddenWord = TEXT("cakes"); //Set the HiddenWord
+    HiddenWord = Isograms[FMath::RandRange(0, Isograms.Num() - 1)]; //Set the HiddenWord
     Lives = HiddenWord.Len();//Set Lives
     bGameOver = false;
 
     PrintLine(TEXT("Guess the %i letter word!"), HiddenWord.Len());
     PrintLine(TEXT("You have %i lives"), Lives);
     PrintLine(TEXT("Type in your guess and \npress enter to continue..."));
+    // PrintLine(TEXT("The HiddenWord is %s. "), *HiddenWord); //Debug Line
 
     const TCHAR HW[] = TEXT("plums");
     PrintLine(TEXT("Character 1 of the hidden word is: %c"), HiddenWord[0]);
@@ -76,7 +73,7 @@ void UBullCowCartridge::EndGame()
     PrintLine(TEXT("\nPress enter to play again."));
 }
 
-void UBullCowCartridge::ProcessGuess(FString Guess)
+void UBullCowCartridge::ProcessGuess(const FString& Guess)
 {
 
        if  (Guess == HiddenWord) //Move outside this function.
@@ -114,12 +111,15 @@ void UBullCowCartridge::ProcessGuess(FString Guess)
             }
              
              //Show the player Bulls and Cows
+             
+             GetBullCows(Guess);
+             PrintLine(TEXT("You have %i Bulls and %i Cows"), Bulls, Cows);
              PrintLine(TEXT("Guess again, you have %i lives left"), Lives);
 
 }
 
 
-bool UBullCowCartridge::IsIsogram(FString Word) const
+bool UBullCowCartridge::IsIsogram(const FString& Word) const
 {
 
     for (int32 Index = 0; Index < Word.Len(); Index++ )
@@ -134,7 +134,7 @@ bool UBullCowCartridge::IsIsogram(FString Word) const
 
     }
 
-TArray<FString> UBullCowCartridge::GetValidWords(TArray<FString> WordList) const
+TArray<FString> UBullCowCartridge::GetValidWords(const TArray<FString>& WordList) const
 {
      TArray<FString> ValidWords;
 
@@ -153,5 +153,35 @@ TArray<FString> UBullCowCartridge::GetValidWords(TArray<FString> WordList) const
 }
 
 
-    return true;
+FBullCowCount UBullCowCartridge::GetBullCows(const FString& Guess) const
+{
+    FBullCowCount Count;
+    
+
+    //for every index guess is same as index Hidden, BullCount ++
+    //if not a bull was it a cow? if yes CowCount ++
+
+    for(int32 GuessIndex = 0; GuessIndex < Guess.Len(); GuessIndex++)
+    {
+        if (Guess[GuessIndex] == HiddenWord[GuessIndex])
+        {
+            Count.Bulls++;
+            continue;
+        }
+    }
+
+    for (int32 HiddenIndex = 0; HiddenWord < count; HIddenWord++)
+    {
+        if(Guess[GuessIndex] == HiddenWord[HiddenIndex])
+        {
+            Count.Cows++;
+            break;
+        }
+
+    }
+    return Count;
 }
+
+
+
+    
